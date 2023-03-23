@@ -1,6 +1,8 @@
 package com.example.productservice;
 
 import com.example.productservice.dto.ProductRequest;
+import com.example.productservice.repository.ProductRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
@@ -15,7 +17,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 
@@ -32,6 +34,8 @@ class ProductServiceApplicationTests {
 	private MockMvc mockMvc;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@Autowired
+	private ProductRepository productRepository;
 
 	@DynamicPropertySource
 	static void setProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
@@ -46,6 +50,13 @@ class ProductServiceApplicationTests {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(productRequestString))
 				.andExpect(status().isCreated());
+		Assertions.assertEquals(1, productRepository.findAll().size());
+	}
+
+	@Test
+	void shouldGetProducts() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
+				.andExpect(status().isOk());
 	}
 
 	private ProductRequest getProductRequest() {
